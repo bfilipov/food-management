@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Manager</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; background: #f5f7fa; }
+        h1 { color: #1a1a1a; }
+        .card { background: #fff; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        input, button { padding: 0.6rem; margin: 0.5rem 0; border: 1px solid #ccc; border-radius: 6px; }
+        button { background: #2563eb; color: white; border: none; cursor: pointer; font-weight: 500; }
+        button:hover { background: #1d4ed8; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: #fff; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f8fafc; font-weight: 600; }
+        .expiring { color: #dc2626; font-weight: 600; }
+
+        /* Recommendation Cards */
+        .rec-container { display: grid; gap: 1rem; margin-top: 1rem; }
+        .rec-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .rec-card h3 { margin: 0 0 0.5rem; color: #0f172a; }
+        .tag { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .rec-meta { color: #64748b; font-size: 0.9rem; margin: 0.5rem 0; }
+        .rec-tip { background: #fef3c7; color: #92400e; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.85rem; margin: 0.75rem 0; }
+        .ingredients-list { list-style: none; padding: 0; margin: 0.5rem 0; }
+        .ingredients-list li { padding: 0.25rem 0; font-size: 0.9rem; }
+        .have { color: #15803d; }
+        .missing { color: #dc2626; }
+        details { margin-top: 0.5rem; padding: 0.5rem; background: #f8fafc; border-radius: 6px; cursor: pointer; }
+        summary { font-weight: 600; color: #334155; }
+        .loading { text-align: center; color: #64748b; padding: 2rem; }
+        .error { color: #dc2626; font-weight: 600; text-align: center; padding: 1rem; }
+    </style>
+</head>
+<body>
+<h1>🍽️ Food Manager</h1>
+
+<div class="card">
+    <h3>Add Food</h3>
+    <form id="food-form">
+        <input type="text" id="name" placeholder="Food name" required>
+        <input type="number" id="quantity" value="1" min="1" required>
+        <input type="date" id="expiration" required>
+        <button type="submit">Add</button>
+    </form>
+</div>
+
+<div class="card">
+    <button onclick="loadFoods()">🔄 Refresh Inventory</button>
+    <button onclick="getRecommendations()">🤖 Get AI Recommendations</button>
+    <div id="recommendations" class="hidden rec-box"></div>
+</div>
+
+<table id="inventory-table">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Qty</th>
+        <th>Expires</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody id="inventory-body"></tbody>
+</table>
+
+<script>
+    const api = '/api';
+
+    async function loadFoods() {
+        const res = await fetch(`${api}/foods`);
+        const foods = await res.json();
+        const tbody = document.getElementById('inventory-body');
+        tbody.innerHTML = '';
+        const today = new Date().toISOString().split('T')[0];
+
+        foods.forEach(food => {
+            const row = document.createElement('tr');
+            const isExpiring = food.expiration_date <= today;
+            row.innerHTML = `
+                <td>${food.name}</td>
+                <td>${food.quantity}</td>
+                <td class="${isExpiring ? 'expiring' : ''}">${food.expiration_date}</td>
+                <td><button onclick="deleteFood(${food.id})" style="background:#ef4444;padding:0.3rem 0.6rem;font-size:0.8rem;">🗑️</button></td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    async function deleteFood(id) {
+        await fetch(`${api}/foods/${id}`, { method: 'DELETE' });
+        loadFoods();
+    }
+
+    document.getElementById('food-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+            name: document.getElementById('name').value,
+            quantity: parseInt(document.getElementById('quantity').value),
+            expiration_date: document.getElementById('expiration').value
+        };
+        await fetch(`${api}/foods`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        e.target.reset();
+        loadFoods();
+    });
+
+    async function loadSavedRecommendations() {
+        const box = document.getElementById('recommendations');
+        box.innerHTML = '<div class="loading">⏳ Loading latest recommendations...</div>';
+        box.classList.remove('hidden');
+
+        try {
+            const res = await fetch(`${api}/recommendations/latest`);
+            if (!res.ok) throw new Error('No saved recommendations yet. Add food to trigger AI.');
+
+            const data = await res.json();
+            renderRecommendations(data.data.recommendations || []);
+        } catch (err) {
+            box.innerHTML = `<div class="error">❌ ${err.message}</div>`;
+        }
+    }
+
+    async function triggerAIRecalc() {
+        const box = document.getElementById('recommendations');
+        box.innerHTML = '<div class="loading">🔄 AI is thinking... (runs in background)</div>';
+        box.classList.remove('hidden');
+
+        try {
+            await fetch(`${api}/recommendations/generate`, { method: 'POST' });
+            box.innerHTML = '<div class="loading">✅ Job queued! Refreshing in 5s...</div>';
+            setTimeout(() => loadSavedRecommendations(), 5000);
+        } catch (err) {
+            box.innerHTML = `<div class="error">❌ Failed to trigger: ${err.message}</div>`;
+        }
+    }
+
+    function renderRecommendations(recs) {
+        if (!recs?.length) {
+            document.getElementById('recommendations').innerHTML = '<div class="error">No recommendations generated yet.</div>';
+            return;
+        }
+
+        document.getElementById('recommendations').innerHTML = '<div class="rec-container">' + recs.map(rec => `
+            <div class="rec-card">
+                <h3>🍽️ ${rec.meal_name}</h3>
+                <span class="tag">${rec.meal_type}</span>
+                <div class="rec-meta">⏱️ ${rec.prep_time_minutes} min | ${rec.difficulty}</div>
+                <p><strong>🔥 Uses expiring:</strong> ${rec.uses_expiring_items.join(', ')}</p>
+                <div class="rec-tip">💡 <strong>Waste Tip:</strong> ${rec.waste_reduction_tip}</div>
+                <details>
+                    <summary>🛒 Ingredients Needed</summary>
+                    <ul class="ingredients-list">
+                        ${rec.ingredients_needed.map(ing => `
+                            <li class="${ing.have ? 'have' : 'missing'}">
+                                ${ing.name}: ${ing.quantity_needed} ${ing.have ? '✅' : '❌'}
+                            </li>
+                        `).join('')}
+                    </ul>
+                </details>
+                <p><strong>📝 Instructions:</strong> ${rec.instructions_summary}</p>
+            </div>
+        `).join('') + '</div>';
+    }
+
+    // Auto-load on page open
+    loadFoods();
+    loadSavedRecommendations();
+</script>
+</body>
+</html>
