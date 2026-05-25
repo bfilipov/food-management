@@ -1,6 +1,7 @@
 # Food management
 
-### This app was developed in the sake of reducing food waste in my own fridge.
+### Born from a simple goal: stop throwing away forgotten groceries. 
+This app tracks expiration dates and suggests practical meals to keep your kitchen fresh and waste-free.   
 
 ## Features
 📦 Inventory Tracking – Add foods with names, quantities, and expiration dates  
@@ -12,11 +13,11 @@
 📱 Simple Frontend – Clean, responsive UI with no external frameworks  
 
 ## Prerequisites
-Docker & Docker Compose v2+
-Python 3.12+ (for local development)
-Poetry: `pip install poetry`
+Docker & Docker Compose v2+  
+Python 3.12+ (for local development)  
+Poetry: `pip install poetry`  
 
-### Option 1: Docker Compose (Recommended)
+### Option 1: Docker Compose (Recommended)  
 
 ```
 # Clone the repository
@@ -37,7 +38,7 @@ docker compose logs -f app
 open http://localhost:8000
 ```
 
-### Option 2: Local Development
+### Option 2: Local Development  
 ```
 # Install dependencies
 poetry install
@@ -55,7 +56,7 @@ export AI_ENDPOINT="http://localhost:8081/v1/chat"
 poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-## ⚙️ Environment Configuration
+## ⚙️ Environment Configuration  
 
 ```
 # PostgreSQL
