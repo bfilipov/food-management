@@ -3,13 +3,13 @@
 ### This app was developed in the sake of reducing food waste in my own fridge.
 
 ## Features
-📦 Inventory Tracking – Add foods with names, quantities, and expiration dates
-⚠️ Smart Expiration Alerts – Visual indicators for items expiring soon or today
-🤖 AI Meal Recommendations – Daily recipe suggestions optimized for your current stock
-♻️ Waste Reduction Tips – Actionable advice to use partial quantities or preserve items
-🔄 Background Auto-Refresh – AI jobs trigger automatically when inventory changes
-🗄️ Persistent Recommendations – Latest AI output saved to PostgreSQL for instant loading
-📱 Simple Frontend – Clean, responsive UI with no external frameworks
+📦 Inventory Tracking – Add foods with names, quantities, and expiration dates  
+⚠️ Smart Expiration Alerts – Visual indicators for items expiring soon or today  
+🤖 AI Meal Recommendations – Daily recipe suggestions optimized for your current stock  
+♻️ Waste Reduction Tips – Actionable advice to use partial quantities or preserve items  
+🔄 Background Auto-Refresh – AI jobs trigger automatically when inventory changes  
+🗄️ Persistent Recommendations – Latest AI output saved to PostgreSQL for instant loading  
+📱 Simple Frontend – Clean, responsive UI with no external frameworks  
 
 ## Prerequisites
 Docker & Docker Compose v2+
