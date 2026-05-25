@@ -26,7 +26,8 @@ cd food-management
 
 # Configure environment variables
 cp .env.example .env
-# Edit .env with your AI endpoint and database credentials
+# Edit .env with your AI endpoint and database credentials 
+(Compatible with free proxy LMM from -> git@github.com:bfilipov/llm-proxy-api.git)
 
 # Build and start all services
 docker compose up --build -d
