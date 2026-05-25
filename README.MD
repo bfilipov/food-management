@@ -1,6 +1,6 @@
 # Food management
 
-### Born from a simple goal: stop throwing away forgotten groceries. 
+Born from a simple goal: stop throwing away forgotten groceries. 
 This app tracks expiration dates and suggests practical meals to keep your kitchen fresh and waste-free.   
 
 ## Features
