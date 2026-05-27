@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
+
 from app.models import FoodItem
 from app.schemas import FoodCreate
+
 
 class FoodRepository:
     def __init__(self, db: Session):

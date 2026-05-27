@@ -3,7 +3,7 @@ name = "food-management"
 version = "0.1.0"
 description = "Food management app"
 authors = [
-    {name = "Your Name",email = "you@example.com"}
+    {name = "Bogomil Filipov", email = "bogomil.filipov@proton.me"}
 ]
 requires-python = ">=3.12"
 dependencies = [
@@ -17,7 +17,9 @@ dependencies = [
     "jinja2 (>=3.1.6,<4.0.0)"
 ]
 
-
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false

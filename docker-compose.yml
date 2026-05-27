@@ -22,7 +22,10 @@ services:
     container_name: food-api
     restart: always
     environment:
-      DATABASE_URL: "postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST:-db}:${POSTGRES_PORT:-5432}/${POSTGRES_DB}"
+      POSTGRES_HOST: db # Override POSTGRES_HOST for Docker only
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       AI_ENDPOINT: ${AI_ENDPOINT}
     ports:
       - "${APP_PORT:-8000}:${APP_PORT:-8000}"
