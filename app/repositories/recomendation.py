@@ -12,5 +12,9 @@ class RecommendationRepository:
         self.db.refresh(rec)
         return rec
 
+    def get_by_inventory_snapshot(self, hash: str) -> Optional[Recommendation]:
+        return self.db.query(Recommendation).filter(
+            Recommendation.inventory_snapshot == hash).one_or_none()
+
     def get_latest(self) -> Recommendation | None:
         return self.db.query(Recommendation).order_by(Recommendation.created_at.desc()).first()

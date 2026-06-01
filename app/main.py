@@ -52,9 +52,16 @@ async def generate_and_save_recommendations():
             {"name": f.name, "quantity": f.quantity, "expires": f.expiration_date.isoformat()}
             for f in foods
         ]
+        snapshot_hash = inventory_snapshot(foods)
+        existing_snapshot = rec_repo.get_by_inventory_snapshot(snapshot_hash)
+        if existing_snapshot:
+            logger.info("Recomendation exists in database")
+            return
+
 
         logger.info("Running AI recommendation in background...")
         rec_data = await ai_client.get_daily_recommendations(inventory)  # ← Returns clean dict now
+        rec_data['inventory_snapshot'] = snapshot_hash
         rec_repo.save(rec_data)  # ← Save the dict directly to JSONB column
         logger.info("Recommendation saved to database")
     except Exception as e:
